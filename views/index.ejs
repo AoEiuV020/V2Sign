@@ -1,11 +1,44 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+
+<head>
+  <title><%= title %></title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+
+<body>
+  <h1><%= title %></h1>
+  <p>生成签名验证身份，</p>
+  <form>
+    V2EX ID: <input type="text" id="v2Id"><br>
+    ns好友码: <input type="text" id="nsCode"><br>
+    接收邀请邮箱: <input type="text" id="email"><br>
+    拼接后: <input type="text" id="content" disabled><br>
+    <input type="button" value="加密上传获取签名" onclick="onUpload()"><input type="button" value="查看公钥" onclick="onShowKey()"><br>
+    签名后: <input type="text" name="content" disabled><br>
+    <input type="button" value="验证签名" onclick="onCheckSign()"><span id="checkResult" hidden>OK</span><br>
+  </form>
+  <script>
+    var v2Id = document.getElementById("v2Id");
+    var nsCode = document.getElementById("nsCode");
+    var email = document.getElementById("email");
+    var content = document.getElementById("content");
+    [v2Id, nsCode, email].forEach((e) => {
+      e.addEventListener('input', onInputChange);
+    })
+    function onInputChange() {
+      content.value = v2Id.value + nsCode.value + email.value;
+    }
+    function onUpload() {
+      console.log("onUpload");
+    }
+    function onShowKey() {
+      console.log("onShowKey");
+    }
+    function onCheckSign() {
+      console.log("onCheckSign");
+    }
+  </script>
+</body>
+
 </html>
