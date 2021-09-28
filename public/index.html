@@ -7,7 +7,6 @@
   <script>
     var worker = new Worker('work.js');
     worker.onmessage = (event) => {
-      console.log("ui.onMessage: " + event.data);
       eval(`${event.data[0]}`)(event.data[1]);
     }
 

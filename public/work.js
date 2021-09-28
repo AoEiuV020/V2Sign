@@ -31,7 +31,6 @@ async function upload(args) {
     return text;
 }
 onmessage = (event) => {
-    console.log("worker.onMessage: " + event.data);
     eval(`${event.data[0]}`)(event.data[1]).then((ret) => {
         postMessage([event.data[0], ret]);
     })
