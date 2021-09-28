@@ -14,11 +14,11 @@ async function sign(text) {
 
 async function upload(args) {
     let data = {
-        vi: args[0],
-        nc: args[1],
-        em: args[2],
-        ls: args[3],
-        pk: args[4]
+        v2Id: args[0],
+        nsCode: args[1],
+        email: args[2],
+        localSign: args[3],
+        publicKey: args[4]
     }
     let response = await fetch('./api/upload', {
         method: 'POST',

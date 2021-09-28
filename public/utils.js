@@ -1,6 +1,6 @@
-if (typeof(require) != 'undefined') {
+if (typeof (require) != 'undefined') {
     var forge = require('node-forge');
-} else if (typeof(importScripts) != 'undefined') {
+} else if (typeof (importScripts) != 'undefined') {
     importScripts('https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js');
 }
 
@@ -31,6 +31,37 @@ function _sign(text, privateKey) {
     return signature;
 }
 
-if (typeof(module) != 'undefined') {
-    module.exports = { _generate, _keypairToPem, _sign };
+function _md5(text) {
+    let md = forge.md.md5.create();
+    md.update(text, "utf8");
+    return md.digest().bytes();
+}
+
+function _toHex(bytes) {
+    return forge.util.bytesToHex(bytes);
+}
+
+function _fromHex(text) {
+    return forge.util.hexToBytes(text);
+}
+
+function _encode64(bytes) {
+    return forge.util.encode64(bytes);
+}
+
+function _decode64(text) {
+    return forge.util.decode64(text);
+}
+
+if (typeof (module) != 'undefined') {
+    module.exports = {
+        _generate,
+        _keypairToPem,
+        _sign,
+        _md5,
+        _toHex,
+        _fromHex,
+        _encode64,
+        _decode64,
+    };
 }
