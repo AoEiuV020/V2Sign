@@ -38,7 +38,7 @@
       worker.postMessage(['generate']);
     </script>
     <div>
-      <p>2. 填写要验证的资料</p>
+      <p>2. 填写要验证的资料 <span id="step2"></span></p>
       V2EX ID: <input type="text" id="v2Id"><br>
       ns好友码: <input type="text" id="nsCode"><br>
       接收邀请邮箱: <input type="text" id="email"><br>
@@ -68,6 +68,7 @@
         }
 
         function clickUpload() {
+          ele('step2').innerText = '正在进行本地签名...';
           worker.postMessage(['sign', content.value])
         }
       </script>
@@ -76,9 +77,11 @@
         var serverSign;
 
         function callUpload() {
+          ele('step2').innerText = '正在上传并等待服务器签名...';
           upload = function (s) {
             serverSign = s;
             ele('serverSign').value = s;
+            ele('step2').innerText = '上传完成并显示服务器签名';
           }
           worker.postMessage(['upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey]])
         }
