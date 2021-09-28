@@ -15,14 +15,6 @@
       return document.getElementById(i);
     }
 
-    function onUpload() {
-      console.log("onUpload");
-    }
-
-    function onShowKey() {
-      console.log("onShowKey");
-    }
-
     function onCheckSign() {
       console.log("onCheckSign");
     }
@@ -35,8 +27,8 @@
   <p>1. 本地异步创建rsa公私钥 <span id="step1">...</span><input id="btnShowKey" onclick="ele('dKey').hidden = false"
       type="button" hidden value="显示密钥"></p>
   <div id='dKey' hidden>
-    私钥：<textarea id="privateKey" disabled></textarea>
-    公钥：<textarea id="publicKey" disabled></textarea>
+    私钥：<textarea rows="3" cols="80" id="privateKey" disabled></textarea>
+    公钥：<textarea rows="3" cols="80" id="publicKey" disabled></textarea>
   </div>
   <script>
     var pem;
@@ -44,8 +36,8 @@
       pem = arg;
       console.log(pem.privateKey);
       console.log(pem.publicKey);
-      ele('privateKey').innerText = pem.privateKey;
-      ele('publicKey').innerText = pem.publicKey;
+      ele('privateKey').value = pem.privateKey;
+      ele('publicKey').value = pem.publicKey;
       ele('step1').innerText = 'OK';
       ele('btnShowKey').hidden = false;
     }
@@ -57,26 +49,48 @@
     ns好友码: <input type="text" id="nsCode"><br>
     接收邀请邮箱: <input type="text" id="email"><br>
     拼接后: <input type="text" id="content" disabled><br>
-    <input type="button" value="加密上传获取签名" onclick="onUpload()"><input type="button" value="查看公钥"
-      onclick="onShowKey()"><br>
-    签名后: <input type="text" name="content" disabled><br>
+    <script>
+      var v2Id = ele("v2Id");
+      var nsCode = ele("nsCode");
+      var email = ele("email");
+      var content = ele("content");
+
+      function onInputChange() {
+        content.value = v2Id.value.replaceAll(/\s/g, '') +
+          nsCode.value.toUpperCase().replaceAll(/[\s-]/g, '').replace(/^SW/, '') +
+          email.value.replaceAll(/\s/g, '');
+      }
+      [v2Id, nsCode, email].forEach((e) => {
+        e.addEventListener('input', onInputChange);
+      })
+    </script>
+    <input type="button" value="本地签名并上传获取服务器签名" onclick="clickUpload()"><br>
+    <script>
+      var localSign;
+      sign = function (s) {
+        localSign = s;
+        ele('localSign').value = s;
+        callUpload();
+      }
+
+      function clickUpload() {
+        worker.postMessage(['sign', content.value])
+      }
+    </script>
+    本地签名后: <input type="text" id="localSign" disabled><br>
+    <script>
+      var serverSign;
+      function callUpload() {
+        upload = function(s) {
+          serverSign = s;
+          ele('serverSign').value = s;
+        }
+        worker.postMessage(['upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey]])
+      }
+    </script>
+    服务器签名后: <input type="text" id="serverSign" disabled><br>
     <input type="button" value="验证签名" onclick="onCheckSign()"><span id="checkResult" hidden>OK</span><br>
   </div>
-  <script>
-    var v2Id = ele("v2Id");
-    var nsCode = ele("nsCode");
-    var email = ele("email");
-    var content = ele("content");
-
-    function onInputChange() {
-      content.value = v2Id.value.replaceAll(/\s/g, '') +
-        nsCode.value.toUpperCase().replaceAll(/[\s-]/g, '').replace(/^SW/, '') +
-        email.value.replaceAll(/\s/g, '');
-    }
-    [v2Id, nsCode, email].forEach((e) => {
-      e.addEventListener('input', onInputChange);
-    })
-  </script>
 </body>
 
 </html>
