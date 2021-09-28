@@ -19,7 +19,7 @@
 <body>
   <h1>V2Sign</h1>
   <p>生成签名验证身份，</p>
-  <p>1. 本地自动异步创建rsa公私钥<span id="step1">中...</span>
+  <p>1. 本地自动异步创建rsa公私钥， <span id="step1"></span>
     <a id="btnShowKey" href="javascript:ele('dKey').hidden = false" type="button" hidden>显示密钥</a>
     <div id='dKey' hidden>
       私钥：<textarea rows="3" cols="64" id="privateKey" disabled></textarea><br>
@@ -27,6 +27,7 @@
     </div>
     <script>
       var pem;
+      ele('step1').innerText = '正在创建...';
       generate = function (arg) {
         pem = arg;
         ele('privateKey').value = pem.privateKey;
@@ -37,7 +38,7 @@
       worker.postMessage(['generate']);
     </script>
     <div>
-      <p>2. 填写要验证的资料 <span id="step2"></span></p>
+      <p>2. 填写要验证的资料， <span id="step2"></span></p>
       V2EX ID: <input type="text" id="v2Id"><br>
       ns好友码: <input type="text" id="nsCode"><br>
       接收邀请邮箱: <input type="text" id="email"><br>
@@ -71,7 +72,7 @@
           worker.postMessage(['sign', content.value])
         }
       </script>
-      本地签名后: <input type="text" id="localSign" disabled><br>
+      本地签名: <input type="text" id="localSign" disabled><br>
       <script>
         var serverSign;
 
@@ -85,14 +86,18 @@
           worker.postMessage(['upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey]])
         }
       </script>
-      服务器签名后: <textarea rows="3" cols="64" id="serverSign" disabled></textarea><br>
+      服务器签名: <textarea rows="3" cols="64" id="serverSign" disabled></textarea><br>
     </div>
     <div>
-      <p>3. 复制签名回帖，或者可以验证一下签名，</p>
+      <p>3. 复制签名回帖，或者可以验证一下签名， <span id="step3"></span></p>
       <input type="button" value="复制签名" onclick="onCopy()">
       <script>
         function onCopy() {
-          console.log("onCopy");
+          ele('serverSign').disabled = false;
+          ele('serverSign').select();
+          document.execCommand("Copy");
+          ele('step3').innerText = '已复制';
+          ele('serverSign').disabled = true;
         }
       </script>
       <input type="button" value="验证签名" onclick="onCheckSign()">
