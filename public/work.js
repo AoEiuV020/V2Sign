@@ -1,37 +1,38 @@
-importScripts('https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js');
+importScripts('./utils.js');
 
 var keypair;
 
-function generate() {
-    keypair = forge.pki.rsa.generateKeyPair({
-        bits: 2048,
-        e: 0x10001
-    });
-    var pem = {
-        privateKey: forge.pki.privateKeyToPem(keypair.privateKey),
-        publicKey: forge.pki.publicKeyToPem(keypair.publicKey)
-    };
+async function generate() {
+    keypair = await _generate();
+    let pem = await _keypairToPem(keypair);
     return pem;
 }
 
-function sign(s) {
-    let pss = forge.pss.create({
-        md: forge.md.sha1.create(),
-        mgf: forge.mgf.mgf1.create(forge.md.sha1.create()),
-        saltLength: 20
-    });
-    let md = forge.md.sha1.create();
-    md.update(s, "utf8");
-    let signature = forge.util.encode64(keypair["privateKey"].sign(md, pss));
-    return signature;
+async function sign(text) {
+    return await _sign(text, keypair["privateKey"]);
 }
 
-function upload(args) {
-    let json = JSON.stringify(args);
-    return json;
+async function upload(args) {
+    let data = {
+        vi: args[0],
+        nc: args[1],
+        em: args[2],
+        ls: args[3],
+        pk: args[4]
+    }
+    let response = await fetch('./api/upload', {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    let text = await response.text();
+    return text;
 }
 onmessage = (event) => {
     console.log("worker.onMessage: " + event.data);
-    var ret = eval(`${event.data[0]}`)(event.data[1]);
-    postMessage([event.data[0], ret])
+    eval(`${event.data[0]}`)(event.data[1]).then((ret) => {
+        postMessage([event.data[0], ret]);
+    })
 }
