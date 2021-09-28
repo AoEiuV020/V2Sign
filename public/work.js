@@ -27,7 +27,12 @@ async function upload(args) {
             'Content-Type': 'application/json'
         }
     });
-    let text = await response.text();
+    var text;
+    if (response.status != 200) {
+        text = "失败： " + response.status;
+    } else {
+        text = await response.text();
+    }
     return text;
 }
 onmessage = (event) => {
