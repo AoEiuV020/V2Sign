@@ -15,10 +15,6 @@
       return document.getElementById(i);
     }
 
-    function onInputChange() {
-      content.value = v2Id.value + nsCode.value + email.value;
-    }
-
     function onUpload() {
       console.log("onUpload");
     }
@@ -36,8 +32,8 @@
 <body>
   <h1><%= title %></h1>
   <p>生成签名验证身份，</p>
-  <p>1. 本地异步创建rsa公私钥 <span id="step1">...</span><input id="btnShowKey" onclick="ele('dKey').hidden = false" type="button"
-      hidden value="显示密钥"></p>
+  <p>1. 本地异步创建rsa公私钥 <span id="step1">...</span><input id="btnShowKey" onclick="ele('dKey').hidden = false"
+      type="button" hidden value="显示密钥"></p>
   <div id='dKey' hidden>
     私钥：<textarea id="privateKey" disabled></textarea>
     公钥：<textarea id="publicKey" disabled></textarea>
@@ -67,10 +63,16 @@
     <input type="button" value="验证签名" onclick="onCheckSign()"><span id="checkResult" hidden>OK</span><br>
   </div>
   <script>
-    var v2Id = document.getElementById("v2Id");
-    var nsCode = document.getElementById("nsCode");
-    var email = document.getElementById("email");
-    var content = document.getElementById("content");
+    var v2Id = ele("v2Id");
+    var nsCode = ele("nsCode");
+    var email = ele("email");
+    var content = ele("content");
+
+    function onInputChange() {
+      content.value = v2Id.value.replaceAll(/\s/g, '') +
+        nsCode.value.toUpperCase().replaceAll(/[\s-]/g, '').replace(/^SW/, '') +
+        email.value.replaceAll(/\s/g, '');
+    }
     [v2Id, nsCode, email].forEach((e) => {
       e.addEventListener('input', onInputChange);
     })
