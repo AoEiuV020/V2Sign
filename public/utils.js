@@ -19,6 +19,10 @@ function _keypairToPem(keypair) {
     };
 }
 
+function _publicKeyFromPem(publicKey) {
+    return forge.pki.publicKeyFromPem(publicKey);
+}
+
 function _sign(text, privateKey) {
     let pss = forge.pss.create({
         md: forge.md.sha1.create(),
@@ -29,6 +33,22 @@ function _sign(text, privateKey) {
     md.update(text, "utf8");
     let signature = forge.util.encode64(privateKey.sign(md, pss));
     return signature;
+}
+
+function _verify(text, signature, publicKey) {
+    pss = forge.pss.create({
+        md: forge.md.sha1.create(),
+        mgf: forge.mgf.mgf1.create(forge.md.sha1.create()),
+        saltLength: 20
+    });
+    md = forge.md.sha1.create();
+    md.update(text, "utf8");
+    let verified = publicKey.verify(
+        md.digest().getBytes(),
+        _decode64(signature),
+        pss
+    );
+    return verified;
 }
 
 function _md5(text) {
@@ -57,7 +77,9 @@ if (typeof (module) != 'undefined') {
     module.exports = {
         _generate,
         _keypairToPem,
+        _publicKeyFromPem,
         _sign,
+        _verify,
         _md5,
         _toHex,
         _fromHex,

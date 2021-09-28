@@ -17,7 +17,19 @@ router.post('/upload', async function (req, res) {
     localSign,
     publicKey
   } = data;
-  let md5 = utils._toHex(utils._md5(utils._decode64(localSign)));
+  v2Id = v2Id.replace(/\s/g, '');
+  nsCode = nsCode.replace(/[^\d]/g, '');
+  email = email.replace(/\s/g, '');
+  let content = v2Id + nsCode + email;
+  let verify = utils._verify(content, localSign, utils._publicKeyFromPem(publicKey));
+  if (!verify) {
+    res.sendStatus(400);
+    return;
+  }
+  let keypair = utils._generate();
+  let signature = utils._sign(localSign, keypair.privateKey);
+  let pem = utils._keypairToPem(keypair);
+  let md5 = utils._toHex(utils._md5(utils._decode64(signature)));
   let folder = path.resolve(dataDir, md5);
   fs.mkdirSync(folder, {
     recursive: true
@@ -25,10 +37,11 @@ router.post('/upload', async function (req, res) {
   fs.writeFileSync(path.resolve(folder, 'v2Id'), v2Id);
   fs.writeFileSync(path.resolve(folder, 'nsCode'), nsCode);
   fs.writeFileSync(path.resolve(folder, 'email'), email);
+  fs.writeFileSync(path.resolve(folder, 'content'), content);
   fs.writeFileSync(path.resolve(folder, 'localSign'), localSign);
   fs.writeFileSync(path.resolve(folder, 'publicKey'), publicKey);
-  let keypair = utils._generate();
-  let signature = utils._sign(localSign, keypair.privateKey);
+  fs.writeFileSync(path.resolve(folder, 'sPrivateKey'), pem.privateKey);
+  fs.writeFileSync(path.resolve(folder, 'sPublicKey'), pem.publicKey);
   res.send(signature);
 });
 

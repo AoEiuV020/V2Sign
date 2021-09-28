@@ -50,9 +50,9 @@
         var content = ele("content");
 
         function onInputChange() {
-          content.value = v2Id.value.replaceAll(/\s/g, '') +
-            nsCode.value.replaceAll(/[^\d]/g, '') +
-            email.value.replaceAll(/\s/g, '');
+          content.value = v2Id.value.replace(/\s/g, '') +
+            nsCode.value.replace(/[^\d]/g, '') +
+            email.value.replace(/\s/g, '');
         }
         [v2Id, nsCode, email].forEach((e) => {
           e.addEventListener('input', onInputChange);
