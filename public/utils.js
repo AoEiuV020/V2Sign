@@ -4,7 +4,7 @@ if (typeof(require) != 'undefined') {
     importScripts('https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js');
 }
 
-async function _generate() {
+function _generate() {
     let keypair = forge.pki.rsa.generateKeyPair({
         bits: 2048,
         e: 0x10001
@@ -12,14 +12,14 @@ async function _generate() {
     return keypair;
 }
 
-async function _keypairToPem(keypair) {
+function _keypairToPem(keypair) {
     return {
         privateKey: forge.pki.privateKeyToPem(keypair.privateKey),
         publicKey: forge.pki.publicKeyToPem(keypair.publicKey)
     };
 }
 
-async function _sign(text, privateKey) {
+function _sign(text, privateKey) {
     let pss = forge.pss.create({
         md: forge.md.sha1.create(),
         mgf: forge.mgf.mgf1.create(forge.md.sha1.create()),

@@ -3,13 +3,13 @@ importScripts('./utils.js');
 var keypair;
 
 async function generate() {
-    keypair = await _generate();
-    let pem = await _keypairToPem(keypair);
+    keypair = _generate();
+    let pem = _keypairToPem(keypair);
     return pem;
 }
 
 async function sign(text) {
-    return await _sign(text, keypair["privateKey"]);
+    return _sign(text, keypair["privateKey"]);
 }
 
 async function upload(args) {
