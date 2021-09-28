@@ -4,17 +4,56 @@
 <head>
   <title><%= title %></title>
   <link rel='stylesheet' href='/stylesheets/style.css' />
+  <script>
+    var worker = new Worker('work.js');
+    worker.onmessage = (event) => {
+      console.log("ui.onMessage: " + event.data);
+      eval(`${event.data[0]}`)(event.data[1]);
+    }
+
+    function id(i) {
+      return document.getElementById(i);
+    }
+
+    function onInputChange() {
+      content.value = v2Id.value + nsCode.value + email.value;
+    }
+
+    function onUpload() {
+      console.log("onUpload");
+    }
+
+    function onShowKey() {
+      console.log("onShowKey");
+    }
+
+    function onCheckSign() {
+      console.log("onCheckSign");
+    }
+  </script>
 </head>
 
 <body>
   <h1><%= title %></h1>
   <p>生成签名验证身份，</p>
+  <p>1. 本地创建rsa公私钥 <span id="step1">...</span></p>
+  <script>
+    var pem;
+    generate = function (arg) {
+      pem = arg;
+      console.log(pem.privateKey);
+      console.log(pem.publicKey);
+      id('step1').innerText = 'OK';
+    }
+    worker.postMessage(['generate']);
+  </script>
   <form>
     V2EX ID: <input type="text" id="v2Id"><br>
     ns好友码: <input type="text" id="nsCode"><br>
     接收邀请邮箱: <input type="text" id="email"><br>
     拼接后: <input type="text" id="content" disabled><br>
-    <input type="button" value="加密上传获取签名" onclick="onUpload()"><input type="button" value="查看公钥" onclick="onShowKey()"><br>
+    <input type="button" value="加密上传获取签名" onclick="onUpload()"><input type="button" value="查看公钥"
+      onclick="onShowKey()"><br>
     签名后: <input type="text" name="content" disabled><br>
     <input type="button" value="验证签名" onclick="onCheckSign()"><span id="checkResult" hidden>OK</span><br>
   </form>
@@ -26,18 +65,6 @@
     [v2Id, nsCode, email].forEach((e) => {
       e.addEventListener('input', onInputChange);
     })
-    function onInputChange() {
-      content.value = v2Id.value + nsCode.value + email.value;
-    }
-    function onUpload() {
-      console.log("onUpload");
-    }
-    function onShowKey() {
-      console.log("onShowKey");
-    }
-    function onCheckSign() {
-      console.log("onCheckSign");
-    }
   </script>
 </body>
 
