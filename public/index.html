@@ -14,21 +14,17 @@
     function ele(i) {
       return document.getElementById(i);
     }
-
-    function onCheckSign() {
-      console.log("onCheckSign");
-    }
   </script>
 </head>
 
 <body>
   <h1>V2Sign</h1>
   <p>生成签名验证身份，</p>
-  <p>1. 本地异步创建rsa公私钥 <span id="step1">...</span>
+  <p>1. 本地自动异步创建rsa公私钥<span id="step1">中...</span>
     <a id="btnShowKey" href="javascript:ele('dKey').hidden = false" type="button" hidden>显示密钥</a>
     <div id='dKey' hidden>
-      私钥：<textarea rows="3" cols="80" id="privateKey" disabled></textarea>
-      公钥：<textarea rows="3" cols="80" id="publicKey" disabled></textarea>
+      私钥：<textarea rows="3" cols="64" id="privateKey" disabled></textarea><br>
+      公钥：<textarea rows="3" cols="64" id="publicKey" disabled></textarea>
     </div>
     <script>
       var pem;
@@ -90,7 +86,21 @@
         }
       </script>
       服务器签名后: <input type="text" id="serverSign" disabled><br>
-      <input type="button" value="验证签名" onclick="onCheckSign()"><span id="checkResult" hidden>OK</span><br>
+    </div>
+    <div>
+      <p>3. 复制签名回帖，或者可以验证一下签名，</p>
+      <input type="button" value="复制签名" onclick="onCopy()">
+      <script>
+        function onCopy() {
+          console.log("onCopy");
+        }
+      </script>
+      <input type="button" value="验证签名" onclick="onCheckSign()">
+      <script>
+        function onCheckSign() {
+          console.log("onCheckSign");
+        }
+      </script>
     </div>
 </body>
 
