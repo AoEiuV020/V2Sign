@@ -57,7 +57,7 @@
 
       function onInputChange() {
         content.value = v2Id.value.replaceAll(/\s/g, '') +
-          nsCode.value.toUpperCase().replaceAll(/[\s-]/g, '').replace(/^SW/, '') +
+          nsCode.value.replaceAll(/[^\d]/g, '') +
           email.value.replaceAll(/\s/g, '');
       }
       [v2Id, nsCode, email].forEach((e) => {
