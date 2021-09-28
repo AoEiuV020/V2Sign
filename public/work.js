@@ -28,7 +28,6 @@ function sign(s) {
 
 function upload(args) {
     let json = JSON.stringify(args);
-    console.log(json);
     return json;
 }
 onmessage = (event) => {

@@ -30,8 +30,6 @@
       var pem;
       generate = function (arg) {
         pem = arg;
-        console.log(pem.privateKey);
-        console.log(pem.publicKey);
         ele('privateKey').value = pem.privateKey;
         ele('publicKey').value = pem.publicKey;
         ele('step1').innerText = 'OK';
