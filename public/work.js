@@ -25,6 +25,11 @@ async function sign(text) {
     return util.sign(text, keypair["privateKey"]);
 }
 
+async function verify(args) {
+    let [text, signature, publicKey] = args;
+    return util.verify(text, signature, util.publicKeyFromPem(publicKey));
+}
+
 async function hash(text) {
     return util.toHex(util.sha256(util.decode64(text)));
 }
