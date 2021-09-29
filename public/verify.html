@@ -17,7 +17,7 @@
                 callbacks[method] = function (arg) {
                     resolve(arg);
                 }
-                worker.postMessage([method, ...args]);
+                worker.postMessage([method, args]);
             })
         }
 
@@ -76,8 +76,8 @@
     <script>
         async function check2() {
             ele('step2').innerText = '校验服务器签名...';
-            if (await doAsync('verify',
-                    [ele('localSign').value, ele('serverSign').value, ele('serverPublicKey').value])) {
+            if (await doAsync('verify', ele('localSign').value,
+                    ele('serverSign').value, ele('serverPublicKey').value)) {
                 ele('step2').innerText = '校验通过';
             } else {
                 ele('step2').innerText = '校验不通过！';
@@ -122,8 +122,8 @@
     <script>
         async function check3() {
             ele('step3').innerText = '校验服务器签名...';
-            if (await doAsync('verify',
-                    [content.value, ele('localSign').value, ele('localPublicKey').value])) {
+            if (await doAsync('verify', content.value,
+                    ele('localSign').value, ele('localPublicKey').value)) {
                 ele('step3').innerText = '校验通过';
             } else {
                 ele('step3').innerText = '校验不通过！';

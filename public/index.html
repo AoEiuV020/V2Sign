@@ -17,7 +17,7 @@
         callbacks[method] = function (arg) {
           resolve(arg);
         }
-        worker.postMessage([method, ...args]);
+        worker.postMessage([method, args]);
       })
     }
 
@@ -140,7 +140,7 @@
         let {
           status,
           body
-        } = await doAsync('upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey])
+        } = await doAsync('upload', v2Id.value, nsCode.value, email.value, localSign, pem.publicKey)
         if (status != 200) {
           ele('serverSign').value = '失败: ' + status;
           if (status / 100 == 4) {

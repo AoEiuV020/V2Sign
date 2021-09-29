@@ -25,8 +25,7 @@ async function sign(text) {
     return util.sign(text, keypair["privateKey"]);
 }
 
-async function verify(args) {
-    let [text, signature, publicKey] = args;
+async function verify(text, signature, publicKey) {
     return util.verify(text, signature, util.publicKeyFromPem(publicKey));
 }
 
@@ -34,13 +33,13 @@ async function hash(text) {
     return util.toHex(util.sha256(util.decode64(text)));
 }
 
-async function upload(args) {
+async function upload(v2Id, nsCode, email, localSign, publicKey) {
     let data = {
-        v2Id: args[0],
-        nsCode: args[1],
-        email: args[2],
-        localSign: args[3],
-        publicKey: args[4]
+        v2Id,
+        nsCode,
+        email,
+        localSign,
+        publicKey
     }
     let response = await fetch('./api/upload', {
         method: 'POST',
@@ -59,7 +58,7 @@ async function upload(args) {
     };
 }
 onmessage = (event) => {
-    eval(`${event.data[0]}`)(event.data[1]).then((ret) => {
+    eval(`${event.data[0]}`)(...(event.data[1])).then((ret) => {
         postMessage([event.data[0], ret]);
     }, (err) => {
         postMessage([event.data[0]]);
