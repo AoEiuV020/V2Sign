@@ -130,6 +130,19 @@
             }
         }
     </script>
+    <script>
+        let list = [
+            ...document.querySelectorAll('input:not([type=button])'),
+            ...document.querySelectorAll('textarea')
+        ]
+        .forEach((input => {
+            input.addEventListener('input', () => {
+                document.querySelectorAll('span[id^=step]').forEach((span) => {
+                    span.innerText = '';
+                });
+            });
+        }));
+    </script>
 </body>
 
 </html>
