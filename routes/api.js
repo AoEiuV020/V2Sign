@@ -55,6 +55,7 @@ router.post('/upload', async function (req, res) {
   save(hash, folder, 'serverSignHash');
   save(pem.privateKey, folder, 'serverPrivateKey');
   save(pem.publicKey, folder, 'serverPublicKey');
+  save(req.ip, folder, 'ip');
   save(md5, dataDir, 'v2Id', util.toHex(util.md5(v2Id)));
   save(md5, dataDir, 'nsCode', util.toHex(util.md5(nsCode)));
   save(md5, dataDir, 'hash', util.toHex(util.md5(hash)));
