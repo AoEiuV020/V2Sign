@@ -29,7 +29,7 @@ router.post('/upload', async function (req, res) {
   let keypair = util.generate();
   let signature = util.sign(localSign, keypair.privateKey);
   let pem = util.keypairToPem(keypair);
-  let md5 = util.toHex(util.md5(util.decode64(signature)));
+  let md5 = util.toHex(util.md5(publicKey));
   let folder = path.resolve(dataDir, md5);
   fs.mkdirSync(folder, {
     recursive: true
