@@ -105,7 +105,7 @@
         worker.postMessage(['sign', content.value])
       }
     </script>
-    服务器签名: <br><textarea rows="3" cols="64" id="serverSign" disabled></textarea>
+    服务器签名: <input type="text" id="serverSign" disabled><br>
     <div id="dServerKey" hidden>
       服务器公钥: <br><textarea rows="3" cols="64" id="serverPublicKey" disabled></textarea><br>
     </div>
@@ -141,24 +141,42 @@
             localStorage.setItem('serverPublicKey', serverPublicKey);
             ele('serverSign').value = serverSign;
             ele('serverPublicKey').value = serverPublicKey;
-            ele('step2').innerText = '上传完成并显示服务器签名';
             ele('btnShowServerKey').hidden = false;
+            callHash();
           }
         }
         worker.postMessage(['upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey]])
       }
     </script>
+    签名摘要: <input type="text" id="serverSignHash" disabled><br>
+    <script>
+      var serverSignHash = localStorage.getItem('serverSignHash');
+      if (serverSignHash) {
+        ele('serverSignHash').value = serverSignHash;
+      }
+
+      function callHash() {
+        ele('step2').innerText = '计算服务器签名摘要...';
+        hash = function (text) {
+          serverSignHash = text;
+          localStorage.setItem('serverSignHash', serverSignHash);
+          ele('serverSignHash').value = serverSignHash;
+          ele('step2').innerText = '上传完成并显示服务器签名摘要';
+        }
+        worker.postMessage(['hash', serverSign])
+      }
+    </script>
   </div>
   <div>
-    <p>3. 复制签名回帖，或者可以验证一下签名， <span id="step3"></span></p>
+    <p>3. 复制签名摘要回帖，或者可以验证一下签名， <span id="step3"></span></p>
     <input type="button" value="复制签名" onclick="onCopy()">
     <script>
       function onCopy() {
-        ele('serverSign').disabled = false;
-        ele('serverSign').select();
+        ele('serverSignHash').disabled = false;
+        ele('serverSignHash').select();
         document.execCommand("Copy");
         ele('step3').innerText = '已复制';
-        ele('serverSign').disabled = true;
+        ele('serverSignHash').disabled = true;
       }
     </script>
     <input type="button" value="验证签名" onclick="onCheckSign()">

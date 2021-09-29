@@ -25,6 +25,10 @@ async function sign(text) {
     return util.sign(text, keypair["privateKey"]);
 }
 
+async function hash(text) {
+    return util.toHex(util.sha256(util.decode64(text)));
+}
+
 async function upload(args) {
     let data = {
         v2Id: args[0],

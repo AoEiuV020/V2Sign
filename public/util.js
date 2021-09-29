@@ -104,9 +104,9 @@ util.verify = function (text, signature, publicKey) {
 /**
  * 
  * @param {string} text 
- * @returns {string}
+ * @returns {forge.Bytes}
  */
-util.md5 = function (text) {
+ util.md5 = function (text) {
     let md = forge.md.md5.create();
     md.update(text, "utf8");
     return md.digest().bytes();
@@ -114,7 +114,18 @@ util.md5 = function (text) {
 
 /**
  * 
- * @param {string} bytes 
+ * @param {string} text 
+ * @returns {forge.Bytes}
+ */
+ util.sha256 = function (text) {
+    let md = forge.md.sha256.create();
+    md.update(text, "utf8");
+    return md.digest().bytes();
+}
+
+/**
+ * 
+ * @param {forge.Bytes} bytes 
  * @returns {string}
  */
 util.toHex = function (bytes) {
@@ -132,7 +143,7 @@ util.fromHex = function (text) {
 
 /**
  * 
- * @param {string} bytes 
+ * @param {forge.Bytes} bytes 
  * @returns {string}
  */
 util.encode64 = function (bytes) {
