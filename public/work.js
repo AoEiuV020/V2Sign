@@ -1,11 +1,24 @@
-importScripts('./util.js');
+if (typeof (require) != 'undefined') {
+    // 保留不会执行的require以便vscode智能提示，
+    var util = require('./util.js');
+} else if (typeof (importScripts) != 'undefined') {
+    importScripts('./util.js');
+}
 
 var keypair;
 
 async function generate() {
     keypair = util.generate();
-    let pem = util.keypairToPem(keypair);
-    return pem;
+    return util.keypairToPem(keypair);
+}
+
+async function importPem(pem) {
+    try {
+        keypair = util.keypairFromPem(pem);
+        return util.keypairToPem(keypair);
+    } catch (e) {
+        return await generate();
+    }
 }
 
 async function sign(text) {

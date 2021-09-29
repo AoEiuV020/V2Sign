@@ -10,7 +10,7 @@ var util = util || {};
  * 
  * @returns {forge.pki.rsa.KeyPair}
  */
- util.generate = function () {
+util.generate = function () {
     let keypair = forge.pki.rsa.generateKeyPair({
         bits: 2048,
         e: 0x10001
@@ -27,6 +27,18 @@ util.keypairToPem = function (keypair) {
     return {
         privateKey: forge.pki.privateKeyToPem(keypair.privateKey),
         publicKey: forge.pki.publicKeyToPem(keypair.publicKey)
+    };
+}
+
+/**
+ * 
+ * @param {{privateKey: string, publicKey: string}} pem 
+ * @returns {forge.pki.rsa.KeyPair}
+ */
+util.keypairFromPem = function (pem) {
+    return {
+        privateKey: util.privateKeyFromPem(pem.privateKey),
+        publicKey: util.publicKeyFromPem(pem.publicKey)
     };
 }
 

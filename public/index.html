@@ -26,16 +26,32 @@
       公钥：<textarea rows="3" cols="64" id="publicKey" disabled></textarea>
     </div>
     <script>
-      var pem;
       ele('step1').innerText = '正在创建...';
-      generate = function (arg) {
+      var pem = {
+        privateKey: localStorage.getItem('localPrivateKey'),
+        publicKey: localStorage.getItem('localPublicKey'),
+      };
+
+      function onPemUpdate(arg) {
         pem = arg;
+        localStorage.setItem('localPrivateKey', pem.privateKey);
+        localStorage.setItem('localPublicKey', pem.publicKey);
         ele('privateKey').value = pem.privateKey;
         ele('publicKey').value = pem.publicKey;
         ele('step1').innerText = 'OK';
         ele('btnShowKey').hidden = false;
       }
-      worker.postMessage(['generate']);
+      if (pem.privateKey && pem.publicKey) {
+        importPem = function (arg) {
+          onPemUpdate(arg);
+        }
+        worker.postMessage(['importPem', pem]);
+      } else {
+        generate = function (arg) {
+          onPemUpdate(arg);
+        }
+        worker.postMessage(['generate']);
+      }
     </script>
     <div>
       <p>2. 填写要验证的资料， <span id="step2"></span></p>
@@ -49,44 +65,61 @@
         var email = ele("email");
         var content = ele("content");
 
+        v2Id.value = localStorage.getItem('v2Id');
+        nsCode.value = localStorage.getItem('nsCode');
+        email.value = localStorage.getItem('email');
+
         function onInputChange() {
           content.value = v2Id.value.replace(/\s/g, '') +
             nsCode.value.replace(/[^\d]/g, '') +
             email.value.replace(/\s/g, '');
         }
+        onInputChange();
         [v2Id, nsCode, email].forEach((e) => {
           e.addEventListener('input', onInputChange);
         })
       </script>
       <input type="button" value="本地签名并上传获取服务器签名" onclick="clickUpload()"><br>
+      本地签名: <input type="text" id="localSign" disabled><br>
       <script>
-        var localSign;
+        var localSign = localStorage.getItem('localSign');
+        if (localSign) {
+          ele('localSign').value = localSign;
+        }
         sign = function (s) {
           localSign = s;
+          localStorage.setItem('localSign', localSign);
           ele('localSign').value = s;
           callUpload();
         }
 
         function clickUpload() {
+          localStorage.setItem('v2Id', v2Id.value);
+          localStorage.setItem('nsCode', nsCode.value);
+          localStorage.setItem('email', email.value);
+          localStorage.setItem('content', content.value);
           ele('step2').innerText = '正在进行本地签名...';
           worker.postMessage(['sign', content.value])
         }
       </script>
-      本地签名: <input type="text" id="localSign" disabled><br>
+      服务器签名: <textarea rows="3" cols="64" id="serverSign" disabled></textarea><br>
       <script>
-        var serverSign;
+        var serverSign = localStorage.getItem('serverSign');
+        if (serverSign) {
+          ele('serverSign').value = serverSign;
+        }
 
         function callUpload() {
           ele('step2').innerText = '正在上传并等待服务器签名...';
           upload = function (s) {
             serverSign = s;
+            localStorage.setItem('serverSign', serverSign);
             ele('serverSign').value = s;
             ele('step2').innerText = '上传完成并显示服务器签名';
           }
           worker.postMessage(['upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey]])
         }
       </script>
-      服务器签名: <textarea rows="3" cols="64" id="serverSign" disabled></textarea><br>
     </div>
     <div>
       <p>3. 复制签名回帖，或者可以验证一下签名， <span id="step3"></span></p>
