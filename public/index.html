@@ -142,9 +142,9 @@
           } = res;
           if (status != 200) {
             ele('serverSign').value = '失败: ' + status;
-            if (status % 100 == 4) {
+            if (status / 100 == 4) {
               ele('step2').innerText = '上传失败！？';
-            } else if (status % 100 == 5) {
+            } else if (status / 100 == 5) {
               ele('step2').innerText = '服务器签名失败！？';
             }
           } else {
