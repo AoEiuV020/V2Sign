@@ -61,7 +61,9 @@ router.post('/upload', async function (req, res) {
   save(md5, dataDir, 'hash', util.toHex(util.md5(hash)));
   res.send({
     publicKey: pem.publicKey,
-    signature
+    signature,
+    weChat: process.env.WE_CHAT || '',
+    qrCode: process.env.QR_CODE || '',
   });
 });
 

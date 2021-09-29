@@ -153,6 +153,7 @@
           serverPublicKey = body.publicKey;
           localStorage.setItem('serverSign', serverSign);
           localStorage.setItem('serverPublicKey', serverPublicKey);
+          updateWeChat(body);
           ele('serverSign').value = serverSign;
           ele('serverPublicKey').value = serverPublicKey;
           ele('btnShowServerKey').hidden = false;
@@ -178,9 +179,9 @@
   </div>
   <div>
     <p>3. 复制签名摘要回帖，或者可以验证一下签名， <span id="step3"></span></p>
-    <input type="button" value="复制签名" onclick="onCopy()">
+    <input type="button" value="复制签名" onclick="onHashCopy()">
     <script>
-      function onCopy() {
+      function onHashCopy() {
         ele('serverSignHash').disabled = false;
         ele('serverSignHash').select();
         document.execCommand("Copy");
@@ -195,6 +196,61 @@
           './verify.html',
           '_blank'
         );
+      }
+    </script>
+  </div>
+  <div>
+    <p>4. 加微信发送ns好友码验证， <span id="step4"></span></p>
+    微信号: <input type="text" id="weChat" disabled><br>
+    <script>
+      var weChat = localStorage.getItem('weChat');
+      if (weChat) {
+        ele('weChat').value = weChat;
+      }
+
+      function updateWeChat(body) {
+        weChat = body.weChat;
+        ele('weChat').value = weChat;
+        localStorage.setItem('weChat', weChat);
+        updateQrCode(body);
+      }
+    </script>
+    <input type="button" value="复制微信号" onclick="onWeChatCopy()"><br>
+    <script>
+      function onWeChatCopy() {
+        ele('weChat').disabled = false;
+        ele('weChat').select();
+        document.execCommand("Copy");
+        ele('step4').innerText = '已复制';
+        ele('weChat').disabled = true;
+      }
+    </script>
+    二维码: <input type="text" id="qrCode" disabled><br>
+    <script>
+      var qrCode = localStorage.getItem('qrCode');
+      if (qrCode) {
+        ele('qrCode').value = qrCode;
+      }
+
+      function updateQrCode(body) {
+        qrCode = body.qrCode;
+        ele('qrCode').value = qrCode;
+        localStorage.setItem('qrCode', qrCode);
+        updateQrCodeImage();
+      }
+    </script>
+    <image id="qrCodeImage"></image>
+    <script>
+      function updateQrCodeImage() {
+        if (!qrCode) {
+          ele('qrCodeImage').src = null;
+          return;
+        }
+        ele('qrCodeImage').src =
+          `https://tool.oschina.net/action/qrcode/generate?data=${encodeURIComponent(qrCode)}&error=L&type=0&margin=4&size=4`;
+      }
+      if (qrCode) {
+        updateQrCodeImage();
       }
     </script>
   </div>
