@@ -27,32 +27,37 @@
     公钥：<br><textarea rows="3" cols="64" id="publicKey" disabled></textarea>
   </div>
   <script>
-    ele('step1').innerText = '正在创建...';
-    var pem = {
-      privateKey: localStorage.getItem('localPrivateKey'),
-      publicKey: localStorage.getItem('localPublicKey'),
-    };
+    var pem;
 
-    function onPemUpdate(arg) {
-      pem = arg;
-      localStorage.setItem('localPrivateKey', pem.privateKey);
-      localStorage.setItem('localPublicKey', pem.publicKey);
-      ele('privateKey').value = pem.privateKey;
-      ele('publicKey').value = pem.publicKey;
-      ele('step1').innerText = 'OK';
-      ele('btnShowKey').hidden = false;
-    }
-    if (pem.privateKey && pem.publicKey) {
-      importPem = function (arg) {
-        onPemUpdate(arg);
+    function callInitKey() {
+      ele('step1').innerText = '正在创建密钥...';
+      pem = {
+        privateKey: localStorage.getItem('localPrivateKey'),
+        publicKey: localStorage.getItem('localPublicKey'),
+      };
+
+      function onPemUpdate(arg) {
+        pem = arg;
+        localStorage.setItem('localPrivateKey', pem.privateKey);
+        localStorage.setItem('localPublicKey', pem.publicKey);
+        ele('privateKey').value = pem.privateKey;
+        ele('publicKey').value = pem.publicKey;
+        ele('step1').innerText = 'OK';
+        ele('btnShowKey').hidden = false;
       }
-      worker.postMessage(['importPem', pem]);
-    } else {
-      generate = function (arg) {
-        onPemUpdate(arg);
+      if (pem.privateKey && pem.publicKey) {
+        importPem = function (arg) {
+          onPemUpdate(arg);
+        }
+        worker.postMessage(['importPem', pem]);
+      } else {
+        generate = function (arg) {
+          onPemUpdate(arg);
+        }
+        worker.postMessage(['generate']);
       }
-      worker.postMessage(['generate']);
     }
+    window.onload = callInitKey;
   </script>
   <div>
     <p>2. 填写要验证的资料， <span id="step2"></span>
