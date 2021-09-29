@@ -28,6 +28,10 @@ router.post('/upload', async function (req, res) {
   v2Id = v2Id.replace(/\s/g, '');
   nsCode = nsCode.replace(/[^\d]/g, '');
   email = email.replace(/\s/g, '');
+  if (!v2Id && !nsCode && !email) {
+    res.sendStatus(400);
+    return;
+  }
   let content = v2Id + nsCode + email;
   let fPublicKey = util.publicKeyFromPem(publicKey);
   let verify = util.verify(content, localSign, fPublicKey);
