@@ -104,7 +104,7 @@
       }
 
       function clickUpload() {
-        if (!v2Id.value && !nsCode.value && !email.value) {
+        if (!v2Id.value || !nsCode.value || !email.value) {
           return;
         }
         if (localStorage.getItem('serverSignHash') && !confirm('重复上传将覆盖旧数据，只有最后一次上传有效，\n是否确认上传？')) {
