@@ -39,9 +39,10 @@ router.post('/upload', async function (req, res) {
   fs.writeFileSync(path.resolve(folder, 'email'), email);
   fs.writeFileSync(path.resolve(folder, 'content'), content);
   fs.writeFileSync(path.resolve(folder, 'localSign'), localSign);
-  fs.writeFileSync(path.resolve(folder, 'publicKey'), publicKey);
-  fs.writeFileSync(path.resolve(folder, 'sPrivateKey'), pem.privateKey);
-  fs.writeFileSync(path.resolve(folder, 'sPublicKey'), pem.publicKey);
+  fs.writeFileSync(path.resolve(folder, 'localPublicKey'), publicKey);
+  fs.writeFileSync(path.resolve(folder, 'serverSign'), signature);
+  fs.writeFileSync(path.resolve(folder, 'serverPrivateKey'), pem.privateKey);
+  fs.writeFileSync(path.resolve(folder, 'serverPublicKey'), pem.publicKey);
   res.send(signature);
 });
 
