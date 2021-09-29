@@ -4,7 +4,9 @@ if (typeof (require) != 'undefined') {
     importScripts('https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js');
 }
 
-function _generate() {
+var util = util || {};
+
+util.generate = function () {
     let keypair = forge.pki.rsa.generateKeyPair({
         bits: 2048,
         e: 0x10001
@@ -12,18 +14,18 @@ function _generate() {
     return keypair;
 }
 
-function _keypairToPem(keypair) {
+util.keypairToPem = function (keypair) {
     return {
         privateKey: forge.pki.privateKeyToPem(keypair.privateKey),
         publicKey: forge.pki.publicKeyToPem(keypair.publicKey)
     };
 }
 
-function _publicKeyFromPem(publicKey) {
+util.publicKeyFromPem = function (publicKey) {
     return forge.pki.publicKeyFromPem(publicKey);
 }
 
-function _sign(text, privateKey) {
+util.sign = function (text, privateKey) {
     let pss = forge.pss.create({
         md: forge.md.sha1.create(),
         mgf: forge.mgf.mgf1.create(forge.md.sha1.create()),
@@ -35,7 +37,7 @@ function _sign(text, privateKey) {
     return signature;
 }
 
-function _verify(text, signature, publicKey) {
+util.verify = function (text, signature, publicKey) {
     pss = forge.pss.create({
         md: forge.md.sha1.create(),
         mgf: forge.mgf.mgf1.create(forge.md.sha1.create()),
@@ -45,45 +47,34 @@ function _verify(text, signature, publicKey) {
     md.update(text, "utf8");
     let verified = publicKey.verify(
         md.digest().getBytes(),
-        _decode64(signature),
+        util.decode64(signature),
         pss
     );
     return verified;
 }
 
-function _md5(text) {
+util.md5 = function (text) {
     let md = forge.md.md5.create();
     md.update(text, "utf8");
     return md.digest().bytes();
 }
 
-function _toHex(bytes) {
+util.toHex = function (bytes) {
     return forge.util.bytesToHex(bytes);
 }
 
-function _fromHex(text) {
+util.fromHex = function (text) {
     return forge.util.hexToBytes(text);
 }
 
-function _encode64(bytes) {
+util.encode64 = function (bytes) {
     return forge.util.encode64(bytes);
 }
 
-function _decode64(text) {
+util.decode64 = function (text) {
     return forge.util.decode64(text);
 }
 
 if (typeof (module) != 'undefined') {
-    module.exports = {
-        _generate,
-        _keypairToPem,
-        _publicKeyFromPem,
-        _sign,
-        _verify,
-        _md5,
-        _toHex,
-        _fromHex,
-        _encode64,
-        _decode64,
-    };
+    module.exports = util;
 }

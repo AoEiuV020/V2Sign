@@ -1,15 +1,15 @@
-importScripts('./utils.js');
+importScripts('./util.js');
 
 var keypair;
 
 async function generate() {
-    keypair = _generate();
-    let pem = _keypairToPem(keypair);
+    keypair = util.generate();
+    let pem = util.keypairToPem(keypair);
     return pem;
 }
 
 async function sign(text) {
-    return _sign(text, keypair["privateKey"]);
+    return util.sign(text, keypair["privateKey"]);
 }
 
 async function upload(args) {

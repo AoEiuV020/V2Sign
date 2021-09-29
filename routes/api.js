@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var utils = require('../public/utils');
+var util = require('../public/util');
 var fs = require('fs');
 var path = require("path");
 
@@ -21,15 +21,15 @@ router.post('/upload', async function (req, res) {
   nsCode = nsCode.replace(/[^\d]/g, '');
   email = email.replace(/\s/g, '');
   let content = v2Id + nsCode + email;
-  let verify = utils._verify(content, localSign, utils._publicKeyFromPem(publicKey));
+  let verify = util.verify(content, localSign, util.publicKeyFromPem(publicKey));
   if (!verify) {
     res.sendStatus(400);
     return;
   }
-  let keypair = utils._generate();
-  let signature = utils._sign(localSign, keypair.privateKey);
-  let pem = utils._keypairToPem(keypair);
-  let md5 = utils._toHex(utils._md5(utils._decode64(signature)));
+  let keypair = util.generate();
+  let signature = util.sign(localSign, keypair.privateKey);
+  let pem = util.keypairToPem(keypair);
+  let md5 = util.toHex(util.md5(util.decode64(signature)));
   let folder = path.resolve(dataDir, md5);
   fs.mkdirSync(folder, {
     recursive: true
