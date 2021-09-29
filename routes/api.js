@@ -33,6 +33,10 @@ router.post('/upload', async function (req, res) {
   }
   let content = v2Id + nsCode + email;
   let fPublicKey = util.publicKeyFromPem(publicKey);
+  if (fPublicKey.n.bitLength() < util.bits) {
+    res.sendStatus(400);
+    return;
+  }
   let verify = util.verify(content, localSign, fPublicKey);
   if (!verify) {
     res.sendStatus(400);

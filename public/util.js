@@ -6,13 +6,15 @@ if (typeof (require) != 'undefined') {
 
 var util = util || {};
 
+util.bits = 2048;
+
 /**
  * 
  * @returns {forge.pki.rsa.KeyPair}
  */
 util.generate = function () {
     let keypair = forge.pki.rsa.generateKeyPair({
-        bits: 2048,
+        bits: util.bits,
         e: 0x10001
     });
     return keypair;
