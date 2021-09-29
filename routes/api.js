@@ -5,7 +5,6 @@ var fs = require('fs');
 var path = require("path");
 
 var dataDir = process.env.dataDir || './data';
-console.log('dataDir: ' + path.resolve(dataDir));
 
 function save(text, ...pathSegments) {
   let file = path.resolve(...pathSegments);

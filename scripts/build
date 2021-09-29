@@ -1,0 +1,2 @@
+cd $(dirname $0) && cd ..
+docker build -t v2sign .

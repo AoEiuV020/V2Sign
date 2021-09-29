@@ -1,0 +1,14 @@
+#!/bin/bash
+set -e
+cd $(dirname $0) && cd ..
+touch .env
+source .env
+if [ -z "$dataDir" ]; then
+  dataDir=$PWD/data
+fi
+mkdir -p $dataDir
+pushd $dataDir
+dataDir=$PWD
+popd
+mount="-v $dataDir:/data"
+docker run -d --rm --net=host --env-file .env -e dataDir=/data $mount --name v2sign v2sign $*
