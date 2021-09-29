@@ -41,6 +41,7 @@ router.post('/upload', async function (req, res) {
   }
   let keypair = util.generate();
   let signature = util.sign(localSign, keypair.privateKey);
+  let hash = util.toHex(util.sha256(util.decode64(signature)));
   let pem = util.keypairToPem(keypair);
   let md5 = util.toHex(util.md5(fPublicKey.n.toString()));
   let folder = path.resolve(dataDir, md5);
@@ -51,11 +52,12 @@ router.post('/upload', async function (req, res) {
   save(localSign, folder, 'localSign');
   save(publicKey, folder, 'localPublicKey');
   save(signature, folder, 'serverSign');
+  save(hash, folder, 'serverSignHash');
   save(pem.privateKey, folder, 'serverPrivateKey');
   save(pem.publicKey, folder, 'serverPublicKey');
   save(md5, dataDir, 'v2Id', util.toHex(util.md5(v2Id)));
   save(md5, dataDir, 'nsCode', util.toHex(util.md5(nsCode)));
-  save(md5, dataDir, 'signature', util.toHex(util.md5(signature)));
+  save(md5, dataDir, 'hash', util.toHex(util.md5(hash)));
   res.send({
     publicKey: pem.publicKey,
     signature
