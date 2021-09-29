@@ -7,6 +7,14 @@ var path = require("path");
 var dataDir = process.env.dataDir || './data';
 console.log('dataDir: ' + path.resolve(dataDir));
 
+function save(text, ...pathSegments) {
+  let file = path.resolve(...pathSegments);
+  fs.mkdirSync(path.dirname(file), {
+    recursive: true
+  })
+  fs.writeFileSync(file, text);
+}
+
 router.post('/upload', async function (req, res) {
   let data = req.body;
   console.log(data);
@@ -22,7 +30,7 @@ router.post('/upload', async function (req, res) {
   email = email.replace(/\s/g, '');
   let content = v2Id + nsCode + email;
   let fPublicKey = util.publicKeyFromPem(publicKey);
-  let verify = util.verify(content, localSign, util.publicKeyFromPem(publicKey));
+  let verify = util.verify(content, localSign, fPublicKey);
   if (!verify) {
     res.sendStatus(400);
     return;
@@ -32,18 +40,18 @@ router.post('/upload', async function (req, res) {
   let pem = util.keypairToPem(keypair);
   let md5 = util.toHex(util.md5(fPublicKey.n.toString()));
   let folder = path.resolve(dataDir, md5);
-  fs.mkdirSync(folder, {
-    recursive: true
-  });
-  fs.writeFileSync(path.resolve(folder, 'v2Id'), v2Id);
-  fs.writeFileSync(path.resolve(folder, 'nsCode'), nsCode);
-  fs.writeFileSync(path.resolve(folder, 'email'), email);
-  fs.writeFileSync(path.resolve(folder, 'content'), content);
-  fs.writeFileSync(path.resolve(folder, 'localSign'), localSign);
-  fs.writeFileSync(path.resolve(folder, 'localPublicKey'), publicKey);
-  fs.writeFileSync(path.resolve(folder, 'serverSign'), signature);
-  fs.writeFileSync(path.resolve(folder, 'serverPrivateKey'), pem.privateKey);
-  fs.writeFileSync(path.resolve(folder, 'serverPublicKey'), pem.publicKey);
+  save(v2Id, folder, 'v2Id');
+  save(nsCode, folder, 'nsCode');
+  save(email, folder, 'email');
+  save(content, folder, 'content');
+  save(localSign, folder, 'localSign');
+  save(publicKey, folder, 'localPublicKey');
+  save(signature, folder, 'serverSign');
+  save(pem.privateKey, folder, 'serverPrivateKey');
+  save(pem.publicKey, folder, 'serverPublicKey');
+  save(md5, dataDir, 'v2Id', util.toHex(util.md5(v2Id)));
+  save(md5, dataDir, 'nsCode', util.toHex(util.md5(nsCode)));
+  save(md5, dataDir, 'signature', util.toHex(util.md5(signature)));
   res.send(signature);
 });
 
