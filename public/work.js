@@ -5,14 +5,16 @@ if (typeof (require) != 'undefined') {
     importScripts('./util.js');
 }
 
+var callbacks = {};
+
 var keypair;
 
-async function generate() {
+callbacks.generate = async function() {
     keypair = util.generate();
     return util.keypairToPem(keypair);
 }
 
-async function importPem(pem) {
+callbacks.importPem = async function(pem) {
     try {
         keypair = util.keypairFromPem(pem);
         return util.keypairToPem(keypair);
@@ -21,19 +23,19 @@ async function importPem(pem) {
     }
 }
 
-async function sign(text) {
+callbacks.sign = async function(text) {
     return util.sign(text, keypair["privateKey"]);
 }
 
-async function verify(text, signature, publicKey) {
+callbacks.verify = async function(text, signature, publicKey) {
     return util.verify(text, signature, util.publicKeyFromPem(publicKey));
 }
 
-async function hash(text) {
+callbacks.hash = async function(text) {
     return util.toHex(util.sha256(util.decode64(text)));
 }
 
-async function upload(v2Id, nsCode, email, localSign, publicKey) {
+callbacks.upload = async function(v2Id, nsCode, email, localSign, publicKey) {
     let data = {
         v2Id,
         nsCode,
@@ -58,7 +60,7 @@ async function upload(v2Id, nsCode, email, localSign, publicKey) {
     };
 }
 onmessage = (event) => {
-    eval(`${event.data[0]}`)(...(event.data[1])).then((ret) => {
+    callbacks[event.data[0]](...(event.data[1])).then((ret) => {
         postMessage([event.data[0], ret]);
     }, (err) => {
         postMessage([event.data[0]]);
