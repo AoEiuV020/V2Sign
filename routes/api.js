@@ -5,6 +5,7 @@ var fs = require('fs');
 var path = require("path");
 
 var dataDir = process.env.dataDir || './data';
+var keyDir = process.env.keyDir || path.resolve(dataDir, 'keys');
 
 function save(text, ...pathSegments) {
   let file = path.resolve(...pathSegments);
@@ -12,6 +13,30 @@ function save(text, ...pathSegments) {
     recursive: true
   })
   fs.writeFileSync(file, text);
+}
+
+function load(...pathSegments) {
+  let file = path.resolve(...pathSegments);
+  if (fs.existsSync(file)) {
+    return fs.readFileSync(file).toString();
+  }
+}
+
+var keypair;
+var pem = {
+  privateKey: load(keyDir, 'privateKey'),
+  publicKey: load(keyDir, 'publicKey')
+}
+if (!pem.privateKey || !pem.publicKey) {
+  keypair = util.generate();
+  pem = util.keypairToPem(keypair);
+  save(pem.privateKey, keyDir, 'privateKey');
+  save(pem.publicKey, keyDir, 'publicKey');
+} else {
+  keypair = {
+    privateKey: util.privateKeyFromPem(pem.privateKey),
+    publicKey: util.publicKeyFromPem(pem.publicKey)
+  }
 }
 
 router.post('/upload', async function (req, res) {
@@ -42,10 +67,8 @@ router.post('/upload', async function (req, res) {
     res.sendStatus(400);
     return;
   }
-  let keypair = util.generate();
   let signature = util.sign(localSign, keypair.privateKey);
   let hash = util.toHex(util.sha256(util.decode64(signature)));
-  let pem = util.keypairToPem(keypair);
   let md5 = util.toHex(util.md5(fPublicKey.n.toString()));
   let folder = path.resolve(dataDir, md5);
   save(v2Id, folder, 'v2Id');
@@ -56,9 +79,8 @@ router.post('/upload', async function (req, res) {
   save(publicKey, folder, 'localPublicKey');
   save(signature, folder, 'serverSign');
   save(hash, folder, 'serverSignHash');
-  save(pem.privateKey, folder, 'serverPrivateKey');
-  save(pem.publicKey, folder, 'serverPublicKey');
   save(req.ip, folder, 'ip');
+  save(req.headers['user-agent'], folder, 'ua');
   save(md5, dataDir, 'v2Id', util.toHex(util.md5(v2Id)));
   save(md5, dataDir, 'nsCode', util.toHex(util.md5(nsCode)));
   save(md5, dataDir, 'hash', util.toHex(util.md5(hash)));
