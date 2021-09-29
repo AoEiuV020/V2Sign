@@ -20,7 +20,8 @@
   <h1>V2Sign</h1>
   <p>生成签名验证身份，</p>
   <p>1. 本地自动异步创建rsa公私钥， <span id="step1"></span>
-    <a id="btnShowKey" href="javascript:ele('dKey').hidden = false" type="button" hidden>显示密钥</a>
+    <a id="btnShowKey" href="javascript:ele('dKey').hidden = false;ele('btnShowKey').hidden = true" type="button"
+      hidden>显示密钥</a>
   </p>
   <div id='dKey' hidden>
     私钥：<br><textarea rows="3" cols="64" id="privateKey" disabled></textarea><br>
@@ -61,7 +62,8 @@
   </script>
   <div>
     <p>2. 填写要验证的资料， <span id="step2"></span>
-      <a id="btnShowServerKey" href="javascript:ele('dServerKey').hidden = false" type="button" hidden>显示服务器密钥</a>
+      <a id="btnShowServerKey" href="javascript:ele('dServerKey').hidden = false;ele('btnShowServerKey').hidden = true"
+        type="button" hidden>显示服务器密钥</a>
     </p>
     V2EX ID: <input type="text" id="v2Id"><br>
     ns好友码: <input type="text" id="nsCode"><br>
