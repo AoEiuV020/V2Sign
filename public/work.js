@@ -48,10 +48,10 @@ async function upload(args) {
     if (response.status == 200) {
         body = await response.json();
     }
-    return ({
+    return {
         status: response.status,
         body
-    });
+    };
 }
 onmessage = (event) => {
     eval(`${event.data[0]}`)(event.data[1]).then((ret) => {
