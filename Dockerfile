@@ -5,4 +5,5 @@ WORKDIR /opt/V2Sign
 RUN npm install
 ADD ./ /opt/V2Sign/
 EXPOSE 3000
+USER node:node
 ENTRYPOINT ["npm", "start"]
