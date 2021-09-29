@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>V2Sign</title>
+    <meta charset="utf-8" name="viewport" content="user-scalable=no, width=device-width" />
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script>
+        var worker = new Worker('work.js');
+        var callbacks = {};
+        worker.onmessage = (event) => {
+            callbacks[event.data[0]](event.data[1]);
+        }
+
+        function doAsync(method, ...args) {
+            return new Promise(function (resolve, reject) {
+                callbacks[method] = function (arg) {
+                    resolve(arg);
+                }
+                worker.postMessage([method, args]);
+            })
+        }
+
+        function ele(i) {
+            return document.getElementById(i);
+        }
+    </script>
+</head>
+
+<body>
+    <h1>V2Sign</h1>
+    <p>数据查询验证身份，</p>
+    <p>1. 输入密码和部分信息查询其他信息， <span id="step1"></span><br></p>
+    <form>
+        密码: <input type="password" id="password" ><br>
+        <input type="text" value="空白input以阻止密码框的回车事件" hidden> 
+    </form>
+    签名摘要: <input type="text" id="hash"><a href="javascript:queryByHash()">查询</a><br>
+    V2EX ID: <input type="text" id="v2Id"><a href="javascript:queryByV2Id()">查询</a><br>
+    ns好友码: <input type="text" id="nsCode"><a href="javascript:queryByNsCode()">查询</a><br>
+    接收邀请邮箱: <input type="text" id="email"><br>
+
+    <script>
+        function bindEnterKey(id, fun) {
+            ele(id).onkeydown = function(event) {
+                let code = event.keyCode;
+                if (code == 13) {
+                    // 回车，
+                    fun();
+                }
+            }
+        }
+        bindEnterKey('hash', queryByHash);
+        bindEnterKey('v2Id', queryByV2Id);
+        bindEnterKey('nsCode', queryByNsCode);
+
+        function queryByHash() {
+            let key = 'hash';
+            let value = ele('hash').value;
+            query(key, value);
+        }
+
+        function queryByV2Id() {
+            let key = 'v2Id';
+            let value = ele('v2Id').value;
+            query(key, value);
+        }
+
+        function queryByNsCode() {
+            let key = 'nsCode';
+            let value = ele('nsCode').value;
+            query(key, value);
+        }
+        async function query(key, value) {
+            let password = ele('password').value;
+            let serverPublicKey = localStorage.getItem('serverPublicKey');
+            if (!key || !value || !password || !serverPublicKey) {
+                return;
+            }
+            value = await doAsync('encrypt', value, password, serverPublicKey);
+            let {
+                status,
+                body
+            } = await doAsync('query', key, value);
+            if (status != 200) {
+                ele('step1').innerText = '失败: ' + status;
+                return;
+            }
+            ele('hash').value = body.hash;
+            ele('v2Id').value = body.v2Id;
+            ele('nsCode').value = body.nsCode;
+            ele('email').value = body.email;
+            ele('step1').innerText = '查询完成';
+        }
+    </script>
+    <script>
+        let list = [
+                ...document.querySelectorAll('input:not([type=button])'),
+                ...document.querySelectorAll('textarea')
+            ]
+            .forEach((input => {
+                input.addEventListener('input', () => {
+                    document.querySelectorAll('span[id^=step]').forEach((span) => {
+                        span.innerText = '';
+                    });
+                });
+            }));
+    </script>
+</body>
+
+</html>

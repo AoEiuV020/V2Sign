@@ -71,6 +71,7 @@ router.post('/upload', async function (req, res) {
   let hash = util.toHex(util.sha256(util.decode64(signature)));
   let md5 = util.toHex(util.md5(fPublicKey.n.toString()));
   let folder = path.resolve(dataDir, md5);
+  save(hash, folder, 'hash');
   save(v2Id, folder, 'v2Id');
   save(nsCode, folder, 'nsCode');
   save(email, folder, 'email');
@@ -78,18 +79,75 @@ router.post('/upload', async function (req, res) {
   save(localSign, folder, 'localSign');
   save(publicKey, folder, 'localPublicKey');
   save(signature, folder, 'serverSign');
-  save(hash, folder, 'serverSignHash');
   save(req.ip, folder, 'ip');
   save(req.headers['user-agent'], folder, 'ua');
+  save(md5, dataDir, 'hash', util.toHex(util.md5(hash)));
   save(md5, dataDir, 'v2Id', util.toHex(util.md5(v2Id)));
   save(md5, dataDir, 'nsCode', util.toHex(util.md5(nsCode)));
-  save(md5, dataDir, 'hash', util.toHex(util.md5(hash)));
+  save(md5, dataDir, 'email', util.toHex(util.md5(email)));
   res.send({
     publicKey: pem.publicKey,
     signature,
     weChat: process.env.WE_CHAT || '',
     qrCode: process.env.QR_CODE || '',
   });
+});
+
+router.post('/query', async function (req, res) {
+  let data = req.body;
+  console.log(data);
+  let {
+    key,
+    value
+  } = data;
+  if (!key || !value) {
+    res.sendStatus(400);
+    return;
+  }
+  if (!['hash', 'nsCode', 'v2Id', 'email'].includes(key)) {
+    res.sendStatus(400);
+    return;
+  }
+  value = util.decode64(value);
+  try {
+    value = util.rsaDecrypt(value, keypair.privateKey);
+  } catch (e) {
+    // 用户保存的服务器公钥错误，
+    res.sendStatus(400);
+    return;
+  }
+  try {
+    value = util.aesDecrypt(value, process.env.PASSWORD);
+  } catch (e) {
+    // 密码错误，
+    res.sendStatus(400);
+    return;
+  }
+  switch (key) {
+    case 'v2Id':
+      value = value.replace(/\s/g, '');
+      break;
+    case 'nsCode':
+      value = value.replace(/[^\d]/g, '');
+      break;
+    case 'email':
+      value = value.replace(/\s/g, '');
+      break;
+  }
+  value = util.toHex(util.md5(value));
+  let md5 = load(dataDir, key, value);
+  if (!md5) {
+    res.sendStatus(404);
+    return;
+  }
+  let body = {
+    hash: load(dataDir, md5, 'hash'),
+    v2Id: load(dataDir, md5, 'v2Id'),
+    nsCode: load(dataDir, md5, 'nsCode'),
+    email: load(dataDir, md5, 'email'),
+  }
+
+  res.send(body);
 });
 
 module.exports = router;

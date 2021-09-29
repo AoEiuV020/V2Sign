@@ -68,7 +68,7 @@ util.privateKeyFromPem = function (privateKey) {
  * @param {forge.pki.rsa.PrivateKey} privateKey 
  * @returns {string}
  */
-util.sign = function (text, privateKey) {
+ util.sign = function (text, privateKey) {
     let pss = forge.pss.create({
         md: forge.md.sha1.create(),
         mgf: forge.mgf.mgf1.create(forge.md.sha1.create()),
@@ -108,7 +108,7 @@ util.verify = function (text, signature, publicKey) {
  * @param {string} text 
  * @returns {forge.Bytes}
  */
- util.md5 = function (text) {
+util.md5 = function (text) {
     let md = forge.md.md5.create();
     md.update(text, "utf8");
     return md.digest().bytes();
@@ -119,7 +119,7 @@ util.verify = function (text, signature, publicKey) {
  * @param {string} text 
  * @returns {forge.Bytes}
  */
- util.sha256 = function (text) {
+util.sha256 = function (text) {
     let md = forge.md.sha256.create();
     md.update(text, "utf8");
     return md.digest().bytes();
@@ -159,6 +159,64 @@ util.encode64 = function (bytes) {
  */
 util.decode64 = function (text) {
     return forge.util.decode64(text);
+}
+
+
+/**
+ * 
+ * @param {string} text 
+ * @param {string} password
+ * @returns {forge.Bytes}
+ */
+util.aesEncrypt = function (text, password) {
+    var key = util.md5(password);
+    var iv = '0123456789101213';
+    var cipher = forge.cipher.createCipher('AES-CBC', key);
+    cipher.start({
+        iv
+    });
+    cipher.update(forge.util.createBuffer(text));
+    cipher.finish();
+    return cipher.output.getBytes();
+}
+
+/**
+ * 
+ * @param {forge.Bytes} bytes 
+ * @param {string} password
+ * @returns {string}
+ */
+util.aesDecrypt = function (bytes, password) {
+    var key = util.md5(password);
+    var iv = '0123456789101213';
+    var cipher = forge.cipher.createDecipher('AES-CBC', key);
+    cipher.start({
+        iv
+    });
+    cipher.update(forge.util.createBuffer(bytes));
+    cipher.finish();
+    return cipher.output.toString();
+}
+
+
+/**
+ * 
+ * @param {string} text 
+ * @param {forge.pki.rsa.PublicKey} publicKey 
+ * @returns {string}
+ */
+ util.rsaEncrypt = function (text, publicKey) {
+    return publicKey.encrypt(text);
+}
+
+/**
+ * 
+ * @param {forge.Bytes} bytes 
+ * @param {forge.pki.rsa.PrivateKey} privateKey 
+ * @returns {string}
+ */
+util.rsaDecrypt = function (bytes, privateKey) {
+    return privateKey.decrypt(bytes);
 }
 
 if (typeof (module) != 'undefined') {
