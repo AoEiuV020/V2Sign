@@ -52,7 +52,10 @@ router.post('/upload', async function (req, res) {
   save(md5, dataDir, 'v2Id', util.toHex(util.md5(v2Id)));
   save(md5, dataDir, 'nsCode', util.toHex(util.md5(nsCode)));
   save(md5, dataDir, 'signature', util.toHex(util.md5(signature)));
-  res.send(signature);
+  res.send({
+    publicKey: pem.publicKey,
+    signature
+  });
 });
 
 module.exports = router;
