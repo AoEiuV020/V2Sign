@@ -1,6 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var util = require('../public/util');
+var util = require('../public/util.js');
 var fs = require('fs');
 var path = require("path");
 

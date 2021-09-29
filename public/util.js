@@ -6,7 +6,11 @@ if (typeof (require) != 'undefined') {
 
 var util = util || {};
 
-util.generate = function () {
+/**
+ * 
+ * @returns {forge.pki.rsa.KeyPair}
+ */
+ util.generate = function () {
     let keypair = forge.pki.rsa.generateKeyPair({
         bits: 2048,
         e: 0x10001
@@ -14,6 +18,11 @@ util.generate = function () {
     return keypair;
 }
 
+/**
+ * 
+ * @param {forge.pki.rsa.KeyPair} keypair 
+ * @returns {{privateKey: string, publicKey: string}}
+ */
 util.keypairToPem = function (keypair) {
     return {
         privateKey: forge.pki.privateKeyToPem(keypair.privateKey),
@@ -21,10 +30,30 @@ util.keypairToPem = function (keypair) {
     };
 }
 
+/**
+ * 
+ * @param {string} publicKey 
+ * @returns {forge.pki.rsa.PublicKey}
+ */
 util.publicKeyFromPem = function (publicKey) {
     return forge.pki.publicKeyFromPem(publicKey);
 }
 
+/**
+ * 
+ * @param {string} privateKey 
+ * @returns {forge.pki.rsa.PrivateKey}
+ */
+util.privateKeyFromPem = function (privateKey) {
+    return forge.pki.privateKeyFromPem(privateKey);
+}
+
+/**
+ * 
+ * @param {string} text 
+ * @param {forge.pki.rsa.PrivateKey} privateKey 
+ * @returns {string}
+ */
 util.sign = function (text, privateKey) {
     let pss = forge.pss.create({
         md: forge.md.sha1.create(),
@@ -37,6 +66,13 @@ util.sign = function (text, privateKey) {
     return signature;
 }
 
+/**
+ * 
+ * @param {string} text 
+ * @param {string} signature 
+ * @param {forge.pki.rsa.PublicKey} publicKey 
+ * @returns {string}
+ */
 util.verify = function (text, signature, publicKey) {
     pss = forge.pss.create({
         md: forge.md.sha1.create(),
@@ -53,24 +89,49 @@ util.verify = function (text, signature, publicKey) {
     return verified;
 }
 
+/**
+ * 
+ * @param {string} text 
+ * @returns {string}
+ */
 util.md5 = function (text) {
     let md = forge.md.md5.create();
     md.update(text, "utf8");
     return md.digest().bytes();
 }
 
+/**
+ * 
+ * @param {string} bytes 
+ * @returns {string}
+ */
 util.toHex = function (bytes) {
     return forge.util.bytesToHex(bytes);
 }
 
+/**
+ * 
+ * @param {string} text 
+ * @returns {string}
+ */
 util.fromHex = function (text) {
     return forge.util.hexToBytes(text);
 }
 
+/**
+ * 
+ * @param {string} bytes 
+ * @returns {string}
+ */
 util.encode64 = function (bytes) {
     return forge.util.encode64(bytes);
 }
 
+/**
+ * 
+ * @param {string} text 
+ * @returns {string}
+ */
 util.decode64 = function (text) {
     return forge.util.decode64(text);
 }
