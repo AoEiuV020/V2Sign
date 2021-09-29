@@ -7,8 +7,18 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
     <script>
         var worker = new Worker('work.js');
+        var callbacks = {};
         worker.onmessage = (event) => {
-            eval(`${event.data[0]}`)(event.data[1]);
+            callbacks[event.data[0]](event.data[1]);
+        }
+
+        function doAsync(method, ...args) {
+            return new Promise(function (resolve, reject) {
+                callbacks[method] = function (arg) {
+                    resolve(arg);
+                }
+                worker.postMessage([method, ...args]);
+            })
         }
 
         function ele(i) {
@@ -37,21 +47,19 @@
     </script>
     <input type="button" value="校验1" onclick="check1()">
     <script>
-        function check1() {
+        async function check1() {
             ele('step1').innerText = '校验服务器签名摘要...';
-            hash = function (text) {
-                if (ele('serverSignHash').value === text) {
-                    ele('step1').innerText = '校验通过';
-                } else {
-                    ele('step1').innerText = '校验不通过！';
-                }
+            let text = await doAsync('hash', ele('serverSign').value);
+            if (ele('serverSignHash').value === text) {
+                ele('step1').innerText = '校验通过';
+            } else {
+                ele('step1').innerText = '校验不通过！';
             }
-            worker.postMessage(['hash', ele('serverSign').value])
         }
     </script>
     <p>2. 校验②服务器签名确实是服务器私钥对③本地签名签的名， <span id="step2"></span><br>
-        算法： rsaVerify('SHA1WithRSA/PSS', ③, ②, ④) 
-     </p>
+        算法： rsaVerify('SHA1WithRSA/PSS', ③, ②, ④)
+    </p>
     ③本地签名: <input type="text" id="localSign"><br>
     ④服务器公钥: <br><textarea rows="3" cols="64" id="serverPublicKey"></textarea><br>
     <script>
@@ -66,22 +74,19 @@
     </script>
     <input type="button" value="校验2" onclick="check2()">
     <script>
-        function check2() {
+        async function check2() {
             ele('step2').innerText = '校验服务器签名...';
-            verify = function (ret) {
-                if (ret) {
-                    ele('step2').innerText = '校验通过';
-                } else {
-                    ele('step2').innerText = '校验不通过！';
-                }
+            if (await doAsync('verify',
+                    [ele('localSign').value, ele('serverSign').value, ele('serverPublicKey').value])) {
+                ele('step2').innerText = '校验通过';
+            } else {
+                ele('step2').innerText = '校验不通过！';
             }
-            worker.postMessage(['verify', [ele('localSign').value, ele('serverSign').value, ele('serverPublicKey')
-                .value]])
         }
     </script>
     <p>3. 校验③本地签名确实是本地私钥对⑤拼接后数据签的名， <span id="step3"></span><br>
-        算法： rsaVerify('SHA1WithRSA/PSS', ⑤, ③, ⑥) 
-     </p>
+        算法： rsaVerify('SHA1WithRSA/PSS', ⑤, ③, ⑥)
+    </p>
     ⑤拼接后: <input type="text" id="content" disabled><br>
     V2EX ID: <input type="text" id="v2Id"><br>
     ns好友码: <input type="text" id="nsCode"><br>
@@ -115,16 +120,14 @@
     </script>
     <input type="button" value="校验3" onclick="check3()">
     <script>
-        function check3() {
+        async function check3() {
             ele('step3').innerText = '校验服务器签名...';
-            verify = function (ret) {
-                if (ret) {
-                    ele('step3').innerText = '校验通过';
-                } else {
-                    ele('step3').innerText = '校验不通过！';
-                }
+            if (await doAsync('verify',
+                    [content.value, ele('localSign').value, ele('localPublicKey').value])) {
+                ele('step3').innerText = '校验通过';
+            } else {
+                ele('step3').innerText = '校验不通过！';
             }
-            worker.postMessage(['verify', [content.value, ele('localSign').value, ele('localPublicKey').value]])
         }
     </script>
 </body>

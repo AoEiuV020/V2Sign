@@ -7,8 +7,18 @@
   <link rel='stylesheet' href='/stylesheets/style.css' />
   <script>
     var worker = new Worker('work.js');
+    var callbacks = {};
     worker.onmessage = (event) => {
-      eval(`${event.data[0]}`)(event.data[1]);
+      callbacks[event.data[0]](event.data[1]);
+    }
+
+    function doAsync(method, ...args) {
+      return new Promise(function (resolve, reject) {
+        callbacks[method] = function (arg) {
+          resolve(arg);
+        }
+        worker.postMessage([method, ...args]);
+      })
     }
 
     function ele(i) {
@@ -31,7 +41,7 @@
   <script>
     var pem;
 
-    function callInitKey() {
+    async function callInitKey() {
       ele('step1').innerText = '正在创建密钥...';
       pem = {
         privateKey: localStorage.getItem('localPrivateKey'),
@@ -48,15 +58,9 @@
         ele('btnShowKey').hidden = false;
       }
       if (pem.privateKey && pem.publicKey) {
-        importPem = function (arg) {
-          onPemUpdate(arg);
-        }
-        worker.postMessage(['importPem', pem]);
+        onPemUpdate(await doAsync('importPem', pem));
       } else {
-        generate = function (arg) {
-          onPemUpdate(arg);
-        }
-        worker.postMessage(['generate']);
+        onPemUpdate(await doAsync('generate'));
       }
     }
     window.onload = callInitKey;
@@ -97,14 +101,8 @@
       if (localSign) {
         ele('localSign').value = localSign;
       }
-      sign = function (s) {
-        localSign = s;
-        localStorage.setItem('localSign', localSign);
-        ele('localSign').value = s;
-        callUpload();
-      }
 
-      function clickUpload() {
+      async function clickUpload() {
         if (!v2Id.value || !nsCode.value || !email.value) {
           return;
         }
@@ -116,7 +114,10 @@
         localStorage.setItem('email', email.value);
         localStorage.setItem('content', content.value);
         ele('step2').innerText = '正在进行本地签名...';
-        worker.postMessage(['sign', content.value])
+        localSign = await doAsync('sign', content.value);
+        localStorage.setItem('localSign', localSign);
+        ele('localSign').value = localSign;
+        callUpload();
       }
     </script>
     服务器签名: <input type="text" id="serverSign" disabled><br>
@@ -134,32 +135,29 @@
         ele('btnShowServerKey').hidden = false;
       }
 
-      function callUpload() {
+      async function callUpload() {
         ele('step2').innerText = '正在上传并等待服务器签名...';
-        upload = function (res) {
-          let {
-            status,
-            body
-          } = res;
-          if (status != 200) {
-            ele('serverSign').value = '失败: ' + status;
-            if (status / 100 == 4) {
-              ele('step2').innerText = '上传失败！？';
-            } else if (status / 100 == 5) {
-              ele('step2').innerText = '服务器签名失败！？';
-            }
-          } else {
-            serverSign = body.signature;
-            serverPublicKey = body.publicKey;
-            localStorage.setItem('serverSign', serverSign);
-            localStorage.setItem('serverPublicKey', serverPublicKey);
-            ele('serverSign').value = serverSign;
-            ele('serverPublicKey').value = serverPublicKey;
-            ele('btnShowServerKey').hidden = false;
-            callHash();
+        let {
+          status,
+          body
+        } = await doAsync('upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey])
+        if (status != 200) {
+          ele('serverSign').value = '失败: ' + status;
+          if (status / 100 == 4) {
+            ele('step2').innerText = '上传失败！？';
+          } else if (status / 100 == 5) {
+            ele('step2').innerText = '服务器签名失败！？';
           }
+        } else {
+          serverSign = body.signature;
+          serverPublicKey = body.publicKey;
+          localStorage.setItem('serverSign', serverSign);
+          localStorage.setItem('serverPublicKey', serverPublicKey);
+          ele('serverSign').value = serverSign;
+          ele('serverPublicKey').value = serverPublicKey;
+          ele('btnShowServerKey').hidden = false;
+          callHash();
         }
-        worker.postMessage(['upload', [v2Id.value, nsCode.value, email.value, localSign, pem.publicKey]])
       }
     </script>
     签名摘要: <input type="text" id="serverSignHash" disabled><br>
@@ -169,15 +167,12 @@
         ele('serverSignHash').value = serverSignHash;
       }
 
-      function callHash() {
+      async function callHash() {
         ele('step2').innerText = '计算服务器签名摘要...';
-        hash = function (text) {
-          serverSignHash = text;
-          localStorage.setItem('serverSignHash', serverSignHash);
-          ele('serverSignHash').value = serverSignHash;
-          ele('step2').innerText = '上传完成并显示服务器签名摘要';
-        }
-        worker.postMessage(['hash', serverSign])
+        serverSignHash = await doAsync('hash', serverSign);
+        localStorage.setItem('serverSignHash', serverSignHash);
+        ele('serverSignHash').value = serverSignHash;
+        ele('step2').innerText = '上传完成并显示服务器签名摘要';
       }
     </script>
   </div>
