@@ -32,17 +32,17 @@
     <p>数据查询验证身份，</p>
     <p>1. 输入密码和部分信息查询其他信息， <span id="step1"></span><br></p>
     <form>
-        密码: <input type="password" id="password" ><br>
-        <input type="text" value="空白input以阻止密码框的回车事件" hidden> 
+        密码: <input type="password" id="password"><br>
+        <input type="text" value="空白input以阻止密码框的回车事件" hidden>
     </form>
     签名摘要: <input type="text" id="hash"><a href="javascript:queryByHash()">查询</a><br>
     V2EX ID: <input type="text" id="v2Id"><a href="javascript:queryByV2Id()">查询</a><br>
     ns好友码: <input type="text" id="nsCode"><a href="javascript:queryByNsCode()">查询</a><br>
-    接收邀请邮箱: <input type="text" id="email"><br>
+    接收邀请邮箱: <input type="text" id="email"><a href="javascript:queryByEmail()">查询</a><br>
 
     <script>
         function bindEnterKey(id, fun) {
-            ele(id).onkeydown = function(event) {
+            ele(id).onkeydown = function (event) {
                 let code = event.keyCode;
                 if (code == 13) {
                     // 回车，
@@ -53,6 +53,7 @@
         bindEnterKey('hash', queryByHash);
         bindEnterKey('v2Id', queryByV2Id);
         bindEnterKey('nsCode', queryByNsCode);
+        bindEnterKey('email', queryByEmail);
 
         function queryByHash() {
             let key = 'hash';
@@ -69,6 +70,12 @@
         function queryByNsCode() {
             let key = 'nsCode';
             let value = ele('nsCode').value;
+            query(key, value);
+        }
+
+        function queryByEmail() {
+            let key = 'email';
+            let value = ele('email').value;
             query(key, value);
         }
         async function query(key, value) {
