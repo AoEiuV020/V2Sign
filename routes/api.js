@@ -21,6 +21,7 @@ router.post('/upload', async function (req, res) {
   nsCode = nsCode.replace(/[^\d]/g, '');
   email = email.replace(/\s/g, '');
   let content = v2Id + nsCode + email;
+  let fPublicKey = util.publicKeyFromPem(publicKey);
   let verify = util.verify(content, localSign, util.publicKeyFromPem(publicKey));
   if (!verify) {
     res.sendStatus(400);
@@ -29,7 +30,7 @@ router.post('/upload', async function (req, res) {
   let keypair = util.generate();
   let signature = util.sign(localSign, keypair.privateKey);
   let pem = util.keypairToPem(keypair);
-  let md5 = util.toHex(util.md5(publicKey));
+  let md5 = util.toHex(util.md5(fPublicKey.n.toString()));
   let folder = path.resolve(dataDir, md5);
   fs.mkdirSync(folder, {
     recursive: true
