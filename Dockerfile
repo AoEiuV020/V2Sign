@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:10-alpine
 LABEL maintainer="AoEiuV020 <aoeiuv020@gmail.com>"
 COPY package.json package-lock.json /opt/V2Sign/
 WORKDIR /opt/V2Sign
